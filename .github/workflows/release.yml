@@ -18,18 +18,6 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             name: flook-macos-aarch64.tar.gz
-          # Linux x86_64
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            name: flook-linux-x86_64.tar.gz
-          # Linux ARM64
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            name: flook-linux-aarch64.tar.gz
-          # Windows x86_64
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            name: flook-windows-x86_64.zip
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -40,27 +28,13 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install cross-compilation tools (Linux ARM64)
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-
       - name: Build release binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Create release archive (Unix)
-        if: runner.os != 'Windows'
+      - name: Create release archive
         run: |
           cd target/${{ matrix.target }}/release
           tar -czf ../../../${{ matrix.name }} flook
-
-      - name: Create release archive (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          cd target/${{ matrix.target }}/release
-          Compress-Archive -Path flook.exe -DestinationPath ../../../${{ matrix.name }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -86,23 +60,17 @@ jobs:
           body: |
             ## Installation
 
-            Download the appropriate binary for your platform:
+            Download the appropriate binary for your Mac:
 
             - **macOS (Intel)**: `flook-macos-x86_64.tar.gz`
             - **macOS (Apple Silicon)**: `flook-macos-aarch64.tar.gz`
-            - **Linux (x86_64)**: `flook-linux-x86_64.tar.gz`
-            - **Linux (ARM64)**: `flook-linux-aarch64.tar.gz`
-            - **Windows (x86_64)**: `flook-windows-x86_64.zip`
 
-            ### Unix/Linux/macOS
+            ### Installation
             ```bash
-            tar -xzf flook-*.tar.gz
+            tar -xzf flook-macos-*.tar.gz
             ./flook
             # Or install to PATH:
             sudo mv flook /usr/local/bin/
             ```
-
-            ### Windows
-            Extract `flook-windows-x86_64.zip` and run `flook.exe` from the command prompt.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
