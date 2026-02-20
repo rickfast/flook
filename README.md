@@ -6,7 +6,7 @@
 
 ## Why flook?
 
-Let's be honest: if you're using Claude Code, Cursor, Aider, or any other CLI-based agentic coding tool, **do you really need a full IDE anymore?** The AI writes the code. You review it. You ask for changes. Rinse and repeat.
+Let's be honest: if you're using Claude Code, Codex CLI, Open Code, or any other CLI-based agentic coding tool, **do you really need a full IDE anymore?** The AI writes the code. You review it. You ask for changes. Rinse and repeat.
 
 But here's the thing - you still want to **watch what's happening**. You want to peek at that file the agent just modified. You want to browse the tree to see if it created the right structure. You want to quickly jump between files without the bloat of VSCode spinning up or the complexity of configuring vim plugins.
 

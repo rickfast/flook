@@ -5,6 +5,7 @@ use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::Frame;
 
 use crate::app::{App, Panel};
+use crate::viewer::{DiffLineType, ViewMode};
 
 /// Render the full UI.
 pub fn draw(frame: &mut Frame, app: &App) {
@@ -93,8 +94,13 @@ fn draw_tree(frame: &mut Frame, app: &App, area: Rect) {
 }
 
 fn draw_viewer(frame: &mut Frame, app: &App, area: Rect) {
+    let mode_indicator = match app.viewer.view_mode {
+        ViewMode::Normal => "",
+        ViewMode::GitDiff => " [DIFF] ",
+    };
+
     let title = match &app.viewer.file_path {
-        Some(p) => format!(" {} ", p.display()),
+        Some(p) => format!(" {}{} ", p.display(), mode_indicator),
         None => " Viewer ".to_string(),
     };
 
@@ -119,6 +125,14 @@ fn draw_viewer(frame: &mut Frame, app: &App, area: Rect) {
         return;
     }
 
+    match app.viewer.view_mode {
+        ViewMode::Normal => draw_normal_view(frame, app, inner),
+        ViewMode::GitDiff => draw_diff_view(frame, app, inner),
+    }
+}
+
+fn draw_normal_view(frame: &mut Frame, app: &App, area: Rect) {
+    let height = area.height as usize;
     let scroll = app.viewer.scroll;
     let end = (scroll + height).min(app.viewer.lines.len());
 
@@ -147,5 +161,61 @@ fn draw_viewer(frame: &mut Frame, app: &App, area: Rect) {
         .collect();
 
     let paragraph = Paragraph::new(lines);
-    frame.render_widget(paragraph, inner);
+    frame.render_widget(paragraph, area);
+}
+
+fn draw_diff_view(frame: &mut Frame, app: &App, area: Rect) {
+    let height = area.height as usize;
+    let scroll = app.viewer.scroll;
+    let end = (scroll + height).min(app.viewer.diff_lines.len());
+
+    // Line number gutter width (find max line number).
+    let max_line_num = app.viewer.diff_lines
+        .iter()
+        .filter_map(|d| d.line_number)
+        .max()
+        .unwrap_or(0);
+    let gutter_width = format!("{}", max_line_num).len() + 1;
+
+    let lines: Vec<Line> = app.viewer.diff_lines[scroll..end]
+        .iter()
+        .map(|diff_line| {
+            // Determine line background and prefix based on type.
+            let (bg_color, prefix, prefix_color) = match diff_line.line_type {
+                DiffLineType::Added => (Color::Rgb(0, 64, 0), "+ ", Color::Green),
+                DiffLineType::Removed => (Color::Rgb(64, 0, 0), "- ", Color::Red),
+                DiffLineType::Context => (Color::Reset, "  ", Color::Reset),
+            };
+
+            // Format line number or leave blank for removed lines.
+            let line_num_str = match diff_line.line_number {
+                Some(num) => format!("{:>width$} ", num, width = gutter_width - 1),
+                None => format!("{:>width$} ", "", width = gutter_width - 1),
+            };
+
+            let mut spans = vec![
+                Span::styled(
+                    line_num_str,
+                    Style::default().fg(Color::DarkGray).bg(bg_color),
+                ),
+                Span::styled(
+                    prefix,
+                    Style::default().fg(prefix_color).bg(bg_color),
+                ),
+            ];
+
+            // Apply background color to all content spans.
+            for seg in &diff_line.segments {
+                spans.push(Span::styled(
+                    seg.text.clone(),
+                    seg.style.bg(bg_color),
+                ));
+            }
+
+            Line::from(spans).style(Style::default().bg(bg_color))
+        })
+        .collect();
+
+    let paragraph = Paragraph::new(lines);
+    frame.render_widget(paragraph, area);
 }

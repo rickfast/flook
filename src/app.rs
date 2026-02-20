@@ -87,6 +87,9 @@ impl App {
             KeyCode::PageUp => self.viewer.scroll_up(20),
             KeyCode::Char('g') | KeyCode::Home => self.viewer.scroll_to_top(),
             KeyCode::Char('G') | KeyCode::End => self.viewer.scroll_to_bottom(),
+            KeyCode::Char('d') => self.viewer.toggle_view_mode(&self.highlighter),
+            KeyCode::Char('n') | KeyCode::Right => self.viewer.jump_to_next_change(),
+            KeyCode::Char('N') | KeyCode::Left => self.viewer.jump_to_prev_change(),
             _ => {}
         }
     }

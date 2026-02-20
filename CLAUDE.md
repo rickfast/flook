@@ -52,11 +52,20 @@ The codebase follows a clear separation of concerns:
 
 **Binary/UTF-8 Detection**: The viewer reads files as bytes first, checks for null bytes in the first 8KB to detect binaries, then validates UTF-8 before attempting to display.
 
+**Git Diff View**: The viewer supports toggling between normal file view and git diff view (press 'd'). In diff mode, it runs `git diff HEAD` for the current file and displays:
+- Added lines with green background and '+' prefix
+- Removed lines with red background and '-' prefix
+- Context lines with no special styling
+The diff is syntax-highlighted and shows line numbers for added/context lines.
+
 ### Key Event Handling
 
 - **Tab**: Switch focus between tree and viewer
 - **j/k or Up/Down**: Navigate (vim-style)
 - **Enter**: In tree, toggle directory or load file
+- **d**: In viewer, toggle between normal and git diff view
+- **n or Right Arrow**: In diff mode, jump to next change (added/removed line)
+- **N or Left Arrow**: In diff mode, jump to previous change (added/removed line)
 - **PageUp/PageDown**: Scroll viewer by 20 lines
 - **g/G or Home/End**: Scroll viewer to top/bottom
 - **q or Ctrl-C**: Quit
