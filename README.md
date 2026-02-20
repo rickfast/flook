@@ -16,6 +16,7 @@ But here's the thing - you still want to **watch what's happening**. You want to
 
 - **Two-panel interface**: File tree on the left, code viewer on the right
 - **Syntax highlighting**: Powered by syntect, supports tons of languages out of the box
+- **Git diff integration**: Toggle between normal view and git diff view with syntax highlighting
 - **Fast**: Pre-highlights files on load. Written in Rust. No bloat.
 - **Vim keybindings**: Because of course it does (j/k navigation, g/G for top/bottom)
 - **Smart binary detection**: Won't try to display your compiled artifacts
@@ -65,6 +66,11 @@ flook src/main.rs
 - `PageUp`/`PageDown` - Scroll code viewer by 20 lines
 - `g` or `Home` - Jump to top of file
 - `G` or `End` - Jump to bottom of file
+
+### Git Diff
+- `d` - Toggle between normal view and git diff view
+- `n` or `→` - Jump to next change (in diff mode)
+- `N` or `←` - Jump to previous change (in diff mode)
 
 ### Quit
 - `q` or `Ctrl-C` - Exit flook
